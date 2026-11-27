@@ -6,6 +6,7 @@
   const NS = 'weread';
   const SHELF_VIEW_KEY = 'weread.shelf-view';
   const READER_THEME_KEY = 'weread.reader-theme';
+  const POPULAR_BATCH_SIZE = 12;
 
   global.__ModuleLoader__.load({
     id: 'weread',
@@ -97,6 +98,7 @@
         'zlib.popularLanguage': '热门书籍语言',
         'zlib.popularAll': '全部',
         'zlib.popularChinese': '中文',
+        'zlib.popularNextBatch': '换一批',
         'zlib.popularEmpty': '暂无热门书籍。',
         'zlib.popularFailed': '热门书籍加载失败，请稍后重试。',
         'zlib.popularReload': '重启 Harness 后即可加载中文热门书籍。',
@@ -232,6 +234,7 @@
         'zlib.popularLanguage': 'Popular books language',
         'zlib.popularAll': 'All',
         'zlib.popularChinese': 'Chinese',
+        'zlib.popularNextBatch': 'Next batch',
         'zlib.popularEmpty': 'No popular books available yet.',
         'zlib.popularFailed': 'Could not load popular books. Try again.',
         'zlib.popularReload': 'Restart Harness to load popular Chinese books.',
@@ -535,6 +538,154 @@
           }
         }
 
+        .weread-setup-toggle {
+          position: relative;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: center;
+          gap: 16px;
+          width: 100%;
+          padding-block: 12px;
+          padding-inline: calc(var(--weread-setup-content-inset) - 1px);
+          box-sizing: border-box;
+          border: 1px solid var(--dsw-alias-border-l2, rgba(127,127,127,.24));
+          border-radius: 12px;
+          background-color: var(--dsw-alias-bg-layer-2, rgba(127,127,127,.08));
+          cursor: pointer;
+        }
+        .weread-setup-toggle:has(:disabled) { cursor: default; }
+        .weread-setup-toggle__copy {
+          display: grid;
+          gap: 3px;
+        }
+        .weread-setup-toggle__description {
+          color: var(--dsw-alias-label-secondary, #5d626b);
+          font-size: 12px;
+          line-height: 1.5;
+          overflow-wrap: anywhere;
+        }
+        .weread-setup-toggle > input {
+          position: absolute;
+          inline-size: 1px;
+          block-size: 1px;
+          opacity: 0;
+        }
+        .weread-setup-toggle__track {
+          position: relative;
+          inline-size: 38px;
+          block-size: 22px;
+          box-sizing: border-box;
+          border: 1px solid var(--dsw-alias-label-tertiary, GrayText);
+          border-radius: 999px;
+          color: var(--dsw-alias-label-secondary, GrayText);
+        }
+        .weread-setup-toggle__track::before {
+          content: '';
+          position: absolute;
+          inset-block-start: 2px;
+          inset-inline-start: 2px;
+          inline-size: 16px;
+          block-size: 16px;
+          border-radius: 50%;
+          background-color: currentColor;
+        }
+        .weread-setup-toggle > input:checked + .weread-setup-toggle__track {
+          --weread-switch-fill: var(--dsw-alias-button-primary-fill, #247bbf);
+          border-color: var(--weread-switch-fill);
+          background-color: var(--weread-switch-fill);
+          color: var(--dsw-alias-bg-layer-1, Canvas);
+        }
+        .weread-setup-toggle > input:checked + .weread-setup-toggle__track::before {
+          inset-inline-start: calc(100% - 18px);
+        }
+        .weread-setup-toggle > input:focus-visible + .weread-setup-toggle__track {
+          outline: 2px solid var(--dsw-alias-label-primary, CanvasText);
+          outline-offset: 3px;
+        }
+        .weread-setup-toggle > input:disabled + .weread-setup-toggle__track { opacity: .5; }
+
+        @media (prefers-reduced-motion: no-preference) {
+          .weread-setup-toggle__track::before { transition: inset-inline-start .15s ease-out; }
+        }
+        @media (forced-colors: active) {
+          .weread-setup-toggle__track {
+            forced-color-adjust: none;
+            border-color: CanvasText;
+            color: CanvasText;
+          }
+          .weread-setup-toggle > input:checked + .weread-setup-toggle__track {
+            --weread-switch-fill: Highlight;
+            color: HighlightText;
+          }
+        }
+
+        .weread-setup-status:empty { position: absolute; }
+
+        .weread-setup-flow {
+          inline-size: 100%;
+          min-inline-size: 0;
+          box-sizing: border-box;
+          border: 1px solid var(--dsw-alias-border-l2, rgba(127,127,127,.24));
+          border-radius: 12px;
+        }
+        .weread-setup-flow__steps {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+        }
+        .weread-setup-flow__step {
+          display: grid;
+          grid-template-columns: 22px minmax(0, 1fr);
+          align-items: start;
+          gap: 10px;
+          padding-block: 12px;
+          padding-inline: calc(var(--weread-setup-content-inset) - 1px);
+        }
+        .weread-setup-flow__step + .weread-setup-flow__step,
+        .weread-setup-flow__footer {
+          border-block-start: 1px solid var(--dsw-alias-border-l2, rgba(127,127,127,.24));
+        }
+        .weread-setup-flow__marker {
+          display: grid;
+          place-items: center;
+          block-size: 22px;
+          border-radius: 50%;
+          background: var(--dsw-alias-interactive-bg-hover, rgba(127,127,127,.12));
+          color: var(--dsw-alias-label-secondary, CanvasText);
+          font-size: 12px;
+          font-weight: 600;
+        }
+        .weread-setup-flow__marker--done {
+          background: rgba(46,125,80,.14);
+          color: var(--dsw-alias-state-success-primary, #35845c);
+        }
+        .weread-setup-flow__row {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 8px 12px;
+        }
+        .weread-setup-flow__copy {
+          flex: 1 1 10rem;
+          min-inline-size: 0;
+          overflow-wrap: break-word;
+        }
+        .weread-setup-flow__row > button {
+          margin-inline-start: auto;
+          max-inline-size: 100%;
+          white-space: normal;
+        }
+        .weread-setup-flow__details { margin-block-start: 10px; }
+        .weread-setup-flow__footer {
+          display: flex;
+          justify-content: flex-end;
+          padding-block: 12px;
+          padding-inline: calc(var(--weread-setup-content-inset) - 1px);
+        }
+        @media (pointer: coarse) {
+          .weread-setup-flow .weread-btn { min-block-size: 44px; }
+        }
+
         /* 目录章节项 */
         .weread-toc-item:hover {
           background-color: var(--weread-action-hover, var(--weread-highlight, rgba(127,127,127,.14))) !important;
@@ -835,6 +986,10 @@
         const showShelf = section === 'shelf';
 
         async function openSearch() {
+          if (!searchEnabled) {
+            openSetup();
+            return;
+          }
           try {
             const state = await rpcCall('zlibSetupStatus');
             setSearchEnabled(state.enabled);
@@ -1079,14 +1234,13 @@
           h('header', { style: styles.homeHeader },
             h('nav', { 'aria-label': t('home.title'), style: styles.controlRow },
               [
-                ['shelf', 'reader.shelf', () => setSection('shelf')],
-                ...(searchEnabled ? [['search', 'zlib.title', openSearch]] : []),
-                ['setup', 'zlib.setupTitle', () => openSetup()],
-              ].map(([name, label, onClick]) => h('button', {
-                key: label, type: 'button', 'aria-pressed': name === section,
-                className: name === section ? 'weread-btn weread-btn--solid' : 'weread-btn weread-btn--option',
+                ['reader.shelf', showShelf, () => setSection('shelf')],
+                ['zlib.title', !showShelf, openSearch],
+              ].map(([label, selected, onClick]) => h('button', {
+                key: label, type: 'button', 'aria-current': selected ? 'page' : undefined,
+                className: selected ? 'weread-btn weread-btn--solid' : 'weread-btn weread-btn--option',
                 onClick,
-                style: name === section
+                style: selected
                   ? { ...styles.primaryBtn, marginTop: 0, height: 32, padding: '0 14px' }
                   : { ...styles.ghostBtn, border: 0, height: 32, padding: '0 14px', fontSize: 13 },
               }, t(label))),
@@ -1260,92 +1414,122 @@
           type: 'button', onClick, disabled, className: primary ? 'weread-btn weread-btn--solid' : 'weread-btn weread-btn--ghost',
           style: primary ? { ...styles.primaryBtn, marginTop: 0 } : styles.ghostBtn,
         }, t(key));
-        const hint = (key) => h('p', { style: styles.setupHint }, t(key));
+        const installed = Boolean(view?.version);
+        const signedIn = Boolean(view?.signedIn);
+        const searchReady = signedIn && !editLogin;
+        const linked = view?.delivery === 'linked';
+        const step = (number, title, description, { done, action, details }) =>
+          h('li', { className: 'weread-setup-flow__step' },
+            h('span', {
+              className: done ? 'weread-setup-flow__marker weread-setup-flow__marker--done' : 'weread-setup-flow__marker',
+              'aria-hidden': true,
+            }, done ? '✓' : number),
+            h('div', null,
+              h('div', { className: 'weread-setup-flow__row' },
+                h('div', { className: 'weread-setup-flow__copy' },
+                  h('h3', { style: styles.setupStepTitle }, t(title)),
+                  h('p', { style: styles.setupStepDescription }, description),
+                ),
+                action,
+              ),
+              details ? h('div', { className: 'weread-setup-flow__details' }, details) : null,
+            ),
+          );
         const progressKey = {
           load: 'home.loading', toggle: 'home.loading', install: 'zlib.setupInstalling',
           domains: 'zlib.setupCheckingDomains', login: 'zlib.setupSigningIn',
           scan: 'zlib.setupStartingScan', cancel: 'home.loading',
         }[pending];
+        const loginForm = installed && !searchReady && domains?.length
+          ? h('form', { onSubmit: submitLogin, style: styles.setupForm },
+            h('fieldset', { disabled: locked, style: styles.setupForm },
+              h('label', { htmlFor: ids + '-domain' }, t('zlib.setupDomain')),
+              h('select', {
+                id: ids + '-domain', name: 'domain', value: domain, style: styles.setupInput,
+                onChange: (event) => setDomain(event.target.value),
+              }, domains.map((item) => h('option', { key: item, value: item }, new URL(item).host))),
+              h('label', { htmlFor: ids + '-email' }, t('zlib.setupEmail')),
+              h('input', {
+                id: ids + '-email', name: 'email', type: 'email', autoComplete: 'section-zlibrary username',
+                required: true, maxLength: 254, style: styles.setupInput,
+              }),
+              h('label', { htmlFor: ids + '-password' }, t('zlib.setupPassword')),
+              h('input', {
+                id: ids + '-password', name: 'password', type: showPassword ? 'text' : 'password',
+                autoComplete: 'section-zlibrary current-password', required: true,
+                maxLength: 1024, style: styles.setupInput,
+              }),
+              h('label', { style: styles.controlRow },
+                h('input', {
+                  type: 'checkbox', checked: showPassword, 'aria-controls': ids + '-password',
+                  onChange: (event) => setShowPassword(event.target.checked),
+                }), t('zlib.setupShowPassword'),
+              ),
+              h('button', {
+                type: 'submit', className: 'weread-btn weread-btn--solid',
+                style: { ...styles.primaryBtn, marginTop: 4, justifySelf: 'start' },
+              }, t('zlib.setupSignIn')),
+            ),
+          ) : null;
 
         return h('section', { 'aria-labelledby': ids + '-title', style: styles.setupPanel },
-          h('div', null,
-            h('h2', { id: ids + '-title', style: styles.setupTitle }, t('zlib.setupTitle')),
-            h('p', { id: ids + '-hint', style: styles.setupHint }, t('zlib.setupDescription')),
-          ),
-          h('p', { role: 'status', style: { ...styles.setupHint, margin: 0 } },
+          h('h2', { id: ids + '-title', style: styles.setupTitle }, t('zlib.setupTitle')),
+          view ? h('label', { className: 'weread-setup-toggle' },
+            h('span', { className: 'weread-setup-toggle__copy' },
+              h('strong', { id: ids + '-toggle' }, t('zlib.setupEnable')),
+              h('span', {
+                id: ids + '-hint', className: 'weread-setup-toggle__description',
+              }, t('zlib.setupDescription')),
+            ),
+            h('input', {
+              type: 'checkbox', switch: '', role: 'switch', checked: view.enabled, disabled: locked, onChange: toggle,
+              'aria-labelledby': ids + '-toggle', 'aria-describedby': ids + '-hint',
+            }),
+            h('span', { className: 'weread-setup-toggle__track', 'aria-hidden': true }),
+          ) : null,
+          h('p', { className: 'weread-setup-status', role: 'status', style: { ...styles.setupHint, margin: 0 } },
             progressKey ? t(progressKey) : scan ? t(scan.scanned ? 'zlib.setupScanned' : 'home.waiting') : ''),
           error ? h('p', { role: 'alert', style: styles.setupError }, t(error)) : null,
           !view && !pending ? button('home.retry', () => perform('load', 'zlibSetupStatus', undefined, updateView)) : null,
-          view ? h('label', { style: styles.setupToggle },
-            h('input', {
-              type: 'checkbox', checked: view.enabled, disabled: locked, onChange: toggle,
-              'aria-describedby': ids + '-hint',
-            }), t('zlib.setupEnable')) : null,
-          view?.enabled ? h('ol', { style: styles.setupSteps },
-            h('li', null,
-              h('h3', { style: styles.setupStepTitle }, t('zlib.setupInstallTitle')),
-              view.version ? h('p', { style: styles.setupHint }, t('zlib.setupInstalled'), ' ', view.version)
-                : view.installSupported
-                  ? h(React.Fragment, null, hint('zlib.setupInstallHint'),
-                      button('zlib.setupInstallAction', () => perform('install', 'zlibSetupInstall', undefined, updateView), true))
-                  : hint('zlib.setupUnsupported'),
-            ),
-            h('li', null,
-              h('h3', { style: styles.setupStepTitle }, t('zlib.setupLoginTitle')),
-              !view.version ? hint('zlib.setupAwaitInstall')
-                : view.signedIn && !editLogin
-                  ? h(React.Fragment, null, hint('zlib.setupSignedIn'),
-                      button('zlib.setupRelogin', () => setEditLogin(true)))
-                  : h(React.Fragment, null,
-                      hint('zlib.setupLoginHint'),
-                      !domains?.length ? button('zlib.setupFindDomain', detectDomains, true) : null,
-                      domains?.length === 0 ? hint('zlib.setupNoDomains') : null,
-                      domains?.length ? h('form', { onSubmit: submitLogin, style: styles.setupForm },
-                        h('fieldset', { disabled: locked, style: styles.setupForm },
-                          h('label', { htmlFor: ids + '-domain' }, t('zlib.setupDomain')),
-                          h('select', {
-                            id: ids + '-domain', name: 'domain', value: domain, style: styles.setupInput,
-                            onChange: (event) => setDomain(event.target.value),
-                          }, domains.map((item) => h('option', { key: item, value: item }, new URL(item).host))),
-                          h('label', { htmlFor: ids + '-email' }, t('zlib.setupEmail')),
-                          h('input', {
-                            id: ids + '-email', name: 'email', type: 'email', autoComplete: 'section-zlibrary username',
-                            required: true, maxLength: 254, style: styles.setupInput,
-                          }),
-                          h('label', { htmlFor: ids + '-password' }, t('zlib.setupPassword')),
-                          h('input', {
-                            id: ids + '-password', name: 'password', type: showPassword ? 'text' : 'password',
-                            autoComplete: 'section-zlibrary current-password', required: true,
-                            maxLength: 1024, style: styles.setupInput,
-                          }),
-                          h('label', { style: styles.controlRow },
-                            h('input', {
-                              type: 'checkbox', checked: showPassword, 'aria-controls': ids + '-password',
-                              onChange: (event) => setShowPassword(event.target.checked),
-                            }), t('zlib.setupShowPassword'),
-                          ),
-                          h('button', {
-                            type: 'submit', className: 'weread-btn weread-btn--solid',
-                            style: { ...styles.primaryBtn, marginTop: 4, justifySelf: 'start' },
-                          }, t('zlib.setupSignIn')),
-                        ),
-                      ) : null,
-                    ),
-            ),
-            h('li', null,
-              h('h3', { style: styles.setupStepTitle }, t('zlib.setupLinkTitle')),
-              !view.signedIn ? hint('zlib.setupAwaitLogin') : h(React.Fragment, null,
-                hint(view.delivery === 'linked' ? 'zlib.setupLinked'
+          view?.enabled ? h('div', { className: 'weread-setup-flow' },
+            h('ol', { className: 'weread-setup-flow__steps', role: 'list' },
+              step(1, 'zlib.setupInstallTitle',
+                installed ? `${t('zlib.setupInstalled')} ${view.version}`
+                  : t(view.installSupported ? 'zlib.setupInstallHint' : 'zlib.setupUnsupported'),
+                {
+                  done: installed,
+                  action: !installed && view.installSupported
+                    ? button('zlib.setupInstallAction', () => perform('install', 'zlibSetupInstall', undefined, updateView), true)
+                    : null,
+                },
+              ),
+              step(2, 'zlib.setupLoginTitle',
+                t(!installed ? 'zlib.setupAwaitInstall' : searchReady ? 'zlib.setupSignedIn'
+                  : domains?.length === 0 ? 'zlib.setupNoDomains' : 'zlib.setupLoginHint'),
+                {
+                  done: installed && searchReady,
+                  action: !installed ? null : searchReady
+                    ? button('zlib.setupRelogin', () => setEditLogin(true))
+                    : !domains?.length ? button('zlib.setupFindDomain', detectDomains, true) : null,
+                  details: loginForm,
+                },
+              ),
+              step(3, 'zlib.setupLinkTitle',
+                t(!signedIn ? 'zlib.setupAwaitLogin' : linked ? 'zlib.setupLinked'
                   : view.delivery === 'mismatch' ? 'zlib.accountMismatch' : 'zlib.setupLinkHint'),
-                scan ? h(React.Fragment, null,
-                  scan.qr ? h('img', { src: scan.qr, alt: t('zlib.setupQrAlt'), style: styles.setupQr }) : null,
-                  button('zlib.setupCancel', cancelScan, false, Boolean(pending)),
-                ) : button(view.delivery === 'linked' ? 'zlib.setupRelink' : 'zlib.setupScanAction', startScan),
+                {
+                  done: signedIn && linked,
+                  action: !signedIn ? null : scan
+                    ? button('zlib.setupCancel', cancelScan, false, Boolean(pending))
+                    : button(linked ? 'zlib.setupRelink' : 'zlib.setupScanAction', startScan),
+                  details: scan?.qr ? h('img', { src: scan.qr, alt: t('zlib.setupQrAlt'), style: styles.setupQr }) : null,
+                },
               ),
             ),
+            searchReady ? h('div', { className: 'weread-setup-flow__footer' },
+              button('zlib.setupOpenSearch', onOpenSearch, true),
+            ) : null,
           ) : null,
-          view?.enabled && view.signedIn && !editLogin
-            ? button('zlib.setupOpenSearch', onOpenSearch, true) : null,
         );
       }
 
@@ -1365,30 +1549,35 @@
         const searchRequest = React.useRef(null);
         const labelId = React.useId();
         const popular = popularByLanguage[popularLanguage] ?? {};
+        const popularBatchCount = Math.ceil((popular.books?.length ?? 0) / POPULAR_BATCH_SIZE);
+        const popularBatch = (popular.batch ?? 0) % (popularBatchCount || 1);
+        const popularOffset = popularBatch * POPULAR_BATCH_SIZE;
+        const popularBooks = popular.books?.slice(popularOffset, popularOffset + POPULAR_BATCH_SIZE) ?? [];
+
+        const updatePopular = React.useCallback((update) => {
+          setPopularByLanguage((current) => ({
+            ...current, [popularLanguage]: { ...current[popularLanguage], ...update },
+          }));
+        }, [popularLanguage]);
 
         React.useEffect(() => () => searchRequest.current?.abort(), []);
 
         React.useEffect(() => {
           if (!active) return;
           const request = new AbortController();
-          function updatePopular(update) {
-            if (request.signal.aborted) return;
-            setPopularByLanguage((current) => ({
-              ...current, [popularLanguage]: { ...current[popularLanguage], ...update },
-            }));
-          }
           updatePopular({ error: '' });
           rpcCall('zlibPopular', { language: popularLanguage }, request.signal).then(({ books, language }) => {
+            if (request.signal.aborted) return;
             if (popularLanguage === 'chinese' && language !== popularLanguage) {
               updatePopular({ error: 'zlib.popularReload' });
             } else {
               updatePopular({ books });
             }
           }).catch((err) => {
-            updatePopular({ error: searchErrorKey(err, 'zlib.popularFailed') });
+            if (!request.signal.aborted) updatePopular({ error: searchErrorKey(err, 'zlib.popularFailed') });
           });
           return () => request.abort();
-        }, [active, popularLanguage, retryPopular, rpcCall]);
+        }, [active, popularLanguage, retryPopular, rpcCall, updatePopular]);
 
         async function search(terms, page, sortOrder = order, fileFormat = format) {
           const keyword = terms.trim();
@@ -1456,7 +1645,13 @@
 
         return h('search', { 'aria-labelledby': labelId + '-label' },
           h('form', { onSubmit: (event) => { event.preventDefault(); search(query, 1); } },
-            h('label', { id: labelId + '-label', htmlFor: labelId, style: { display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 5 } }, t('zlib.label')),
+            h('div', { style: { ...styles.controlRow, justifyContent: 'space-between', marginBottom: 5 } },
+              h('label', { id: labelId + '-label', htmlFor: labelId, style: { fontSize: 13, fontWeight: 600 } }, t('zlib.label')),
+              h('button', {
+                type: 'button', className: 'weread-btn weread-btn--option', onClick: () => openSetup(),
+                style: { ...styles.ghostBtn, border: 0, minHeight: 28 },
+              }, t('zlib.setupTitle')),
+            ),
             h('div', { style: { display: 'flex', gap: 8 } },
               h('input', {
                 id: labelId, name: 'q', type: 'search', value: query, required: true, maxLength: 200,
@@ -1516,11 +1711,18 @@
           !submitted ? h('section', { style: { marginTop: 10 }, 'aria-labelledby': labelId + '-popular' },
             h('div', { style: { ...styles.controlRow, justifyContent: 'space-between', marginBottom: 12 } },
               h('h2', { id: labelId + '-popular', style: { fontSize: 15, fontWeight: 600, margin: 0 } }, t('zlib.popular')),
-              h(ChoicePills, {
-                label: t('zlib.popularLanguage'),
-                options: [['all', t('zlib.popularAll')], ['chinese', t('zlib.popularChinese')]],
-                value: popularLanguage, onChange: setPopularLanguage,
-              }),
+              h('div', { style: styles.controlRow },
+                h(ChoicePills, {
+                  label: t('zlib.popularLanguage'),
+                  options: [['all', t('zlib.popularAll')], ['chinese', t('zlib.popularChinese')]],
+                  value: popularLanguage, onChange: setPopularLanguage,
+                }),
+                popularBatchCount > 1 && !popular.error ? h('button', {
+                  type: 'button', className: 'weread-btn weread-btn--ghost', style: styles.ghostBtn,
+                  'aria-controls': labelId + '-popular-books',
+                  onClick: () => updatePopular({ batch: (popularBatch + 1) % popularBatchCount }),
+                }, t('zlib.popularNextBatch')) : null,
+              ),
             ),
             popular.error ? h('div', { role: 'status', style: { ...styles.muted, fontSize: 13, marginBottom: 12 } },
               t(popular.error), ' ',
@@ -1530,8 +1732,8 @@
                 style: styles.ghostBtn,
               }, t(popular.error === 'zlib.login' ? 'zlib.setupRelogin' : 'home.retry')) : null,
             ) : null,
-            popular.books?.length
-              ? h('ul', { style: styles.coverGrid }, popular.books.map((book) => h('li', { key: book.title },
+            popularBooks.length
+              ? h('ul', { id: labelId + '-popular-books', style: styles.coverGrid }, popularBooks.map((book) => h('li', { key: book.title },
                   h(CoverTile, { book, t, disabled: Boolean(importing), onOpen: () => {
                     const title = book.title.slice(0, 200);
                     setQuery(title);
@@ -1974,14 +2176,13 @@
       // Shared styles
       // ---------------------------------------------------------------------
       const styles = {
-        setupPanel: { display: 'grid', justifyItems: 'start', gap: 10, maxWidth: 440, fontSize: 13 },
-        setupTitle: { fontSize: 16, margin: 0, fontWeight: 650 },
-        setupToggle: {
-          display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8,
-          background: 'var(--dsw-alias-bg-layer-1, rgba(127,127,127,.10))', fontWeight: 600,
+        setupPanel: {
+          '--weread-setup-content-inset': '16px',
+          display: 'grid', justifyItems: 'start', gap: 10, maxWidth: 440, marginInline: 'auto', fontSize: 13,
         },
-        setupSteps: { display: 'grid', gap: 14, margin: 0, paddingInlineStart: 24, width: '100%', boxSizing: 'border-box' },
+        setupTitle: { fontSize: 16, margin: 0, fontWeight: 650 },
         setupStepTitle: { fontSize: 14, margin: 0, fontWeight: 600 },
+        setupStepDescription: { margin: '3px 0 0', color: 'var(--dsw-alias-label-secondary, #5d626b)', lineHeight: 1.45 },
         setupHint: { margin: '4px 0 6px', color: 'var(--dsw-alias-label-secondary, #5d626b)', lineHeight: 1.5 },
         setupError: { margin: 0, color: 'var(--dsw-alias-state-warn-primary, #996000)' },
         setupForm: { display: 'grid', gap: 5, margin: 0, padding: 0, border: 0, minWidth: 0 },

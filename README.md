@@ -21,23 +21,23 @@
 
 ## 找书与导入
 
-在书架打开「找书设置」，勾选「启用找书」，然后在面板内完成以下操作。
+从书架点顶部「找书」，在「找书设置」里开启找书，然后在面板内完成以下操作。
 
 1. **安装 zlib。** 已装好的 zlib 可以直接使用。首次安装时，插件从 [zlib 官方发布页](https://github.com/heartleo/zlib/releases/tag/v0.0.15) 下载并校验，支持 macOS、Windows 和 Linux 的 x64 与 ARM64，安装到当前用户目录。
 2. **登录 Z-Library。** 点击「检测可用域名」，选择可达的域名，再输入自己的邮箱和密码。登录会话保存在 Harness 主机上的 zlib 配置中。
 3. **绑定微信读书。** 如果还要从搜索结果导入，请用当前书架对应的微信账号扫描绑定二维码。只搜索可以跳过这一步。
 
-搜索结果支持 EPUB、PDF、MOBI、AZW3 和 TXT，请选取你有权使用的电子书。导入后插件会刷新书架。关闭找书会隐藏搜索入口，书架和阅读仍可使用。
+搜索结果支持 EPUB、PDF、MOBI、AZW3 和 TXT，请选取你有权使用的电子书。导入后插件会刷新书架。关闭后，「找书」页显示设置。
 
 ## 安装
 
 在 Harness 的插件管理里添加以下 GitHub 地址，或在终端运行命令。将 `desktop` 替换为你正在使用的 profile，例如 `web`。
 
 ```sh
-dsh plugin --profile desktop add github:noahhqy-star/dsh-weread#v1.0.0
+dsh plugin --profile desktop add github:noahhqy-star/dsh-weread#v1.0.1
 ```
 
-也可以在 [GitHub Releases](https://github.com/noahhqy-star/dsh-weread/releases) 下载 `weread-1.0.0.tgz`，用 `dsh plugin --profile desktop add ./weread-1.0.0.tgz` 安装。
+也可以在 [GitHub Releases](https://github.com/noahhqy-star/dsh-weread/releases) 下载 `weread-1.0.1.tgz`，用 `dsh plugin --profile desktop add ./weread-1.0.1.tgz` 安装。
 
 需要使用 DeepSeek Harness 0.2.2-rc.2 或更高版本。独立运行 DSH CLI 时，需 Node.js 22 或更高版本。
 
