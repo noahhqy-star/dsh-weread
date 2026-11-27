@@ -4,13 +4,25 @@
 
 ## 界面预览
 
-![在 DeepSeek Harness 右侧栏阅读，左侧保留会话区](docs/screenshots/reader.png)
+### 微信读书书架
 
-| 微信读书书架 | 找书设置 |
-| --- | --- |
-| ![书架以封面网格展示书籍和阅读进度](docs/screenshots/shelf.png) | ![找书设置展示安装 zlib、登录 Z-Library 和绑定微信读书](docs/screenshots/search-settings.png) |
+![右侧栏的微信读书书架，显示书籍封面和阅读进度](docs/screenshots/shelf.webp)
 
-截图中的书籍和配置状态均为示例。
+### 右侧分屏阅读
+
+![在 DeepSeek Harness 右侧栏阅读，左侧保留会话区](docs/screenshots/reader.webp)
+
+### 中文热门书籍
+
+![找书页面选择中文后显示的热门书籍](docs/screenshots/popular-chinese.webp)
+
+### 全部热门书籍
+
+![找书页面选择全部后显示的热门书籍](docs/screenshots/popular-all.webp)
+
+### 搜索结果
+
+![按书名搜索后显示不同版本、文件格式和导入书架按钮](docs/screenshots/search-results.webp)
 
 ## 功能
 
