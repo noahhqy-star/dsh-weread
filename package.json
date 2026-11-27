@@ -1,5 +1,5 @@
 {
-  "name": "weread",
+  "name": "@quinn_hoo/weread",
   "version": "1.0.1",
   "type": "module",
   "description": "微信读书：在 DeepSeek Harness 里扫码登录、浏览书架并在右侧栏阅读，边读边聊。",

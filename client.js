@@ -9,7 +9,7 @@
   const POPULAR_BATCH_SIZE = 12;
 
   global.__ModuleLoader__.load({
-    id: 'weread',
+    id: '@quinn_hoo/weread',
     factory(require) {
       const React = require('react');
       const h = React.createElement;

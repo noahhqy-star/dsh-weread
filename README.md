@@ -31,7 +31,13 @@
 
 ## 安装
 
-在 Harness 的插件管理里添加以下 GitHub 地址，或在终端运行命令。将 `desktop` 替换为你正在使用的 profile，例如 `web`。
+在终端从 npm 安装。将 `desktop` 替换为你正在使用的 profile，例如 `web`。
+
+```sh
+dsh plugin --profile desktop add @quinn_hoo/weread
+```
+
+也可以在 Harness 的插件管理里添加以下 GitHub 地址，或在终端运行命令。
 
 ```sh
 dsh plugin --profile desktop add github:noahhqy-star/dsh-weread#v1.0.1
