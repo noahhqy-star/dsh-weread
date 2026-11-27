@@ -1,0 +1,4 @@
+# 微信读书 bundle：向 DSH 注入 host 插件 + client 插件
+- insert:
+    - id: weread
+      name: weread
