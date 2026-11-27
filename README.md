@@ -71,6 +71,10 @@ dsh plugin --profile desktop add github:noahhqy-star/dsh-weread#v1.0.1
 
 需要使用 DeepSeek Harness 0.2.2-rc.2 或更高版本。独立运行 DSH CLI 时，需 Node.js 22 或更高版本。
 
+## 发布维护
+
+推送到 `main` 后，GitHub Actions 会运行测试，并通过 npm Trusted Publishing 自动发布。发布号根据工作流编号递增，发布进度可以在 [GitHub Actions](https://github.com/noahhqy-star/dsh-weread/actions/workflows/publish-npm.yml) 查看。
+
 ## 说明与限制
 
 - 书架和阅读请求发往微信读书。启用找书后，关键词发往配置的 Z-Library 域名，导入请求发往微信读书。

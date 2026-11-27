@@ -1,0 +1,79 @@
+name: Publish to npm
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-release
+  cancel-in-progress: false
+
+jobs:
+  test:
+    if: github.repository == 'noahhqy-star/dsh-weread'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: corepack pnpm@11.7.0 install --frozen-lockfile --ignore-scripts
+      - run: npm test
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    environment: npm-release
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PACKAGE_NAME: '@quinn_hoo/weread'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
+      - name: Prepare the release for main
+        id: release
+        shell: bash
+        run: |
+          main_sha=$(git ls-remote --exit-code origin refs/heads/main | cut -f1)
+          if [[ "$main_sha" != "$GITHUB_SHA" ]]; then
+            echo 'A newer commit is on main. Skipping this release.'
+            exit 0
+          fi
+          latest=$(npm view "$PACKAGE_NAME@latest" version gitHead --json --prefer-online)
+          NPM_LATEST="$latest" node .github/scripts/prepare-npm-release.mjs
+      - name: Publish with npm Trusted Publishing
+        if: steps.release.outputs.version != ''
+        run: npm publish --access public --ignore-scripts --provenance
+      - name: Verify the public npm version
+        if: steps.release.outputs.version != ''
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        shell: bash
+        run: |
+          for attempt in {1..41}; do
+            if git_head=$(npm view "$PACKAGE_NAME@$VERSION" gitHead --prefer-online --fetch-retries=0 --fetch-timeout=8000 2>/dev/null) &&
+              [[ "$git_head" == "$GITHUB_SHA" ]]; then
+              printf 'Published [%s@%s](https://www.npmjs.com/package/%s/v/%s)\n' \
+                "$PACKAGE_NAME" "$VERSION" "$PACKAGE_NAME" "$VERSION" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            if [[ "$attempt" != 41 ]]; then sleep 15; fi
+          done
+          echo "::error::$PACKAGE_NAME@$VERSION is not yet visible with the expected commit"
+          exit 1
