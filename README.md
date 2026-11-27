@@ -2,6 +2,16 @@
 
 在 DeepSeek Harness 里扫码登录微信读书，打开书架，在右侧栏分屏阅读。
 
+## 界面预览
+
+![在 DeepSeek Harness 右侧栏阅读，左侧保留会话区](docs/screenshots/reader.png)
+
+| 微信读书书架 | 找书设置 |
+| --- | --- |
+| ![书架以封面网格展示书籍和阅读进度](docs/screenshots/shelf.png) | ![找书设置展示安装 zlib、登录 Z-Library 和绑定微信读书](docs/screenshots/search-settings.png) |
+
+截图中的书籍和配置状态均为示例。
+
 ## 功能
 
 - **扫码登录**：点击左侧栏「自动化任务」下面的「微信读书」导航项（与「插件」「更多」同款紧凑小行），打开微信扫一扫，确认后即完成授权（令牌持久保存在本机）。若微信提示 4 位验证码，在面板内输入即可。
