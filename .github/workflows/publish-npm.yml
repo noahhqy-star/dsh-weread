@@ -55,7 +55,7 @@ jobs:
             echo 'A newer commit is on main. Skipping this release.'
             exit 0
           fi
-          latest=$(npm view "$PACKAGE_NAME@latest" version gitHead --json --prefer-online)
+          latest=$(npm view "$PACKAGE_NAME@latest" --json --prefer-online | jq -c '{version,gitHead}')
           NPM_LATEST="$latest" node .github/scripts/prepare-npm-release.mjs
       - name: Publish with npm Trusted Publishing
         if: steps.release.outputs.version != ''
